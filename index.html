@@ -10,48 +10,26 @@
 </head>
 <body>
     <!-- Cabecera con información de usuario y notificaciones -->
-    <header>
-        <div class="logo">
-            <img src="logo-placeholder.png" alt="Logo MediConsulta">
-            <h1>MediConsulta</h1>
+   <!-- Reemplazar las imágenes faltantes con iconos Font Awesome -->
+<header>
+    <div class="logo">
+        <!-- Reemplazar logo-placeholder.png con un icono -->
+        <i class="fas fa-hospital-alt fa-2x"></i>
+        <h1>MediConsulta</h1>
+    </div>
+    <div class="user-actions">
+        <div class="notifications">
+            <i class="fas fa-bell"></i>
+            <span class="badge">2</span>
         </div>
-        <div class="user-info">
-            <div class="notifications" onclick="toggleNotifications()">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge">3</span>
-            </div>
-            <div class="profile" onclick="toggleProfileMenu()">
-                <img src="profile-placeholder.png" alt="Perfil">
-                <span>Juan Pérez</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
-            <!-- Panel de notificaciones -->
-            <div id="notificationsPanel" class="notifications-panel">
-                <h3>Notificaciones</h3>
-                <div class="notification-item unread">
-                    <i class="fas fa-calendar-check"></i>
-                    <div>
-                        <p>Recordatorio: Tienes una cita mañana a las 14:30 con Dr. Martínez.</p>
-                        <small>Hace 2 horas</small>
-                    </div>
-                </div>
-                <div class="notification-item">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <div>
-                        <p>Reembolso procesado por cancelación de cita.</p>
-                        <small>Hace 1 día</small>
-                    </div>
-                </div>
-                <a href="#" class="ver-todas">Ver todas</a>
-            </div>
-            <!-- Menú de perfil -->
-            <div id="profileMenu" class="profile-menu">
-                <a href="#"><i class="fas fa-user"></i> Mi perfil</a>
-                <a href="#"><i class="fas fa-cog"></i> Configuración</a>
-                <a href="#" onclick="showLoginForm()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
-            </div>
+        <div class="user-profile">
+            <!-- Reemplazar profile-placeholder.png con un icono -->
+            <i class="fas fa-user-circle"></i>
+            <span>Juan Pérez</span>
+            <i class="fas fa-chevron-down"></i>
         </div>
-    </header>
+    </div>
+</header>
 
     <!-- Menú principal de navegación -->
     <div class="menu">

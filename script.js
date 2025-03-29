@@ -106,11 +106,47 @@ function setupModalEvents() {
     });
 }
 
-// Función para abrir el modal principal
+// Añadir esta función al archivo JavaScript
 function openModal() {
-    document.getElementById('modal').style.display = 'block';
-    document.getElementById('modal-overlay').style.display = 'block';
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modal = document.getElementById('consulta-modal'); // Asumiendo que tienes un modal con este ID
+    
+    if (modalOverlay && modal) {
+        modalOverlay.style.display = 'block';
+        modal.style.display = 'block';
+    } else {
+        console.error("Modal o overlay no encontrado");
+    }
+    
+    // Si no existe el modal de consulta, redirigir directamente a videollamada
+    if (!modal) {
+        openVideoCall();
+    }
 }
+
+// Asegúrate de tener un modal en tu HTML con ID 'consulta-modal'
+// O añade este HTML a tu documento
+document.body.insertAdjacentHTML('beforeend', `
+    <div id="consulta-modal" class="modal">
+        <div class="modal-header">
+            <h3>Consulta Virtual</h3>
+            <button onclick="closeModal()" class="btn-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>¿Deseas entrar a la consulta?</p>
+            <div class="modal-actions">
+                <button onclick="openVideoCall()" class="btn-primary">
+                    <i class="fas fa-video"></i> Entrar a la consulta
+                </button>
+                <button onclick="closeModal()" class="btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+`);
 
 // Función para cerrar cualquier modal
 function closeModal() {

@@ -1472,3 +1472,181 @@ function initDoctorButtons() {
         });
     });
 }
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar el listener para cambiar entre vistas
+    const toggleBtn = document.getElementById('toggleViewBtn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleUserView);
+    }
+    
+    // Comprobar si ya estamos en la vista de doctor (desde localStorage)
+    if (localStorage.getItem('currentView') === 'doctor') {
+        toggleUserView();
+    }
+});
+
+// Reemplazo completo para la función toggleUserView
+function toggleUserView() {
+    console.log("Cambiando vista de usuario...");
+    
+    if (currentView === 'patient') {
+        // Cambiar a vista de doctor
+        document.body.style.background = '#f0f4f8';
+        
+        // Ocultar elementos de la vista de paciente
+        const pacienteHeader = document.querySelector('body > header');
+        if (pacienteHeader) pacienteHeader.style.display = 'none';
+        
+        document.getElementById('citasList').style.display = 'none';
+        document.getElementById('filterSection').style.display = 'none';
+        document.getElementById('tratamientosSection').style.display = 'none';
+        document.getElementById('helpSection').style.display = 'none';
+        document.getElementById('videocallContainer').style.display = 'none';
+        document.querySelector('.menu').style.display = 'none';
+        
+        // Mostrar la vista del doctor
+        document.getElementById('doctorView').style.display = 'block';
+        
+        // Configurar botones de la vista del doctor después de que sea visible
+        setTimeout(function() {
+            configureIniciarButtons();
+            showDoctorCitas(); // Asegurarse de que la lista de citas esté visible
+        }, 100);
+        
+        // Actualizar el botón
+        document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Paciente';
+        
+        currentView = 'doctor';
+        localStorage.setItem('currentView', 'doctor');
+    } else {
+        // Cambiar a vista de paciente
+        document.body.style.background = '#f5f7fa';
+        
+        // Ocultar vista del doctor
+        document.getElementById('doctorView').style.display = 'none';
+        document.getElementById('doctorVideocallContainer').style.display = 'none';
+        
+        // Mostrar elementos de la vista de paciente
+        const pacienteHeader = document.querySelector('body > header');
+        if (pacienteHeader) pacienteHeader.style.display = 'flex';
+        document.querySelector('.menu').style.display = 'flex';
+        
+        // Mostrar sección de citas
+        showCitas();
+        
+        // Actualizar el botón
+        document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor';
+        
+        currentView = 'patient';
+        localStorage.setItem('currentView', 'patient');
+    }
+    
+    console.log("Vista cambiada a:", currentView);
+}
+
+// Nueva función para configurar los botones de iniciar
+function configureIniciarButtons() {
+    console.log("Configurando botones de iniciar consulta...");
+    
+    // Remover todos los event listeners existentes usando clonación
+    const iniciarButtons = document.querySelectorAll('.btn-iniciar');
+    console.log("Botones encontrados:", iniciarButtons.length);
+    
+    iniciarButtons.forEach(button => {
+        // Remover el atributo onclick para evitar conflictos
+        button.removeAttribute('onclick');
+        
+        // Clonar y reemplazar el botón para eliminar todos los event listeners
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Añadir un nuevo event listener
+        newButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Extraer ID del paciente del atributo data o del elemento más cercano
+            const patientId = this.getAttribute('data-patient-id') || 1;
+            console.log("Iniciando videollamada con paciente ID:", patientId);
+            
+            // Llamar directamente a la función openDoctorVideoCall
+            handleDoctorVideoCall(patientId);
+        });
+    });
+}
+
+// Función wrapper para manejar la videollamada del doctor
+function handleDoctorVideoCall(patientId) {
+    console.log("Manejando videollamada del doctor para paciente ID:", patientId);
+    
+    // Obtener referencias a los elementos necesarios
+    const doctorView = document.getElementById('doctorView');
+    const doctorVideocallContainer = document.getElementById('doctorVideocallContainer');
+    const doctorConsultasList = document.getElementById('doctorConsultasList');
+    const doctorFilterSection = document.getElementById('doctorFilterSection');
+    
+    if (!doctorVideocallContainer) {
+        console.error("No se encontró el contenedor de videollamada del doctor");
+        return;
+    }
+    
+    // Ocultar componentes de la lista
+    if (doctorConsultasList) doctorConsultasList.style.display = 'none';
+    if (doctorFilterSection) doctorFilterSection.style.display = 'none';
+    
+    // Mostrar el contenedor de videollamada
+    doctorVideocallContainer.style.display = 'block';
+    
+    // Asegurarse de que la vista del doctor esté visible
+    if (doctorView) doctorView.style.display = 'block';
+    
+    // Iniciar la videollamada
+    initiateDoctorVideoCall(patientId);
+}
+
+// Función para iniciar la videollamada (separando la lógica)
+function initiateDoctorVideoCall(patientId) {
+    // Solicitar acceso a cámara y micrófono
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function(stream) {
+                doctorLocalStream = stream;
+                
+                // Mostrar video del doctor
+                const doctorVideo = document.getElementById('doctorSelfVideo');
+                if (doctorVideo) {
+                    doctorVideo.srcObject = stream;
+                    doctorVideo.play().catch(err => console.error("Error reproduciendo video:", err));
+                }
+                
+                // Ocultar placeholder
+                const doctorSelfPlaceholder = document.getElementById('doctorSelfPlaceholder');
+                if (doctorSelfPlaceholder) {
+                    doctorSelfPlaceholder.classList.add('hidden');
+                }
+                
+                // Iniciar tiempo de llamada
+                startDoctorCallTimer();
+            })
+            .catch(function(error) {
+                console.error("Error accediendo a la cámara del doctor:", error);
+                alert("No se pudo acceder a la cámara. Verifique los permisos del navegador.");
+                
+                // Mostrar placeholder en caso de error
+                const doctorSelfPlaceholder = document.getElementById('doctorSelfPlaceholder');
+                if (doctorSelfPlaceholder) {
+                    doctorSelfPlaceholder.classList.remove('hidden');
+                }
+                
+                // Iniciar tiempo de llamada de todos modos
+                startDoctorCallTimer();
+            });
+    } else {
+        alert("Su navegador no soporta acceso a cámara y micrófono.");
+        const doctorSelfPlaceholder = document.getElementById('doctorSelfPlaceholder');
+        if (doctorSelfPlaceholder) {
+            doctorSelfPlaceholder.classList.remove('hidden');
+        }
+        startDoctorCallTimer();
+    }
+}

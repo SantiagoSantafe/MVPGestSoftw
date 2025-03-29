@@ -867,19 +867,26 @@ let doctorCallSeconds = 0;
 let isDoctorMicOn = true;
 let isDoctorCameraOn = true;
 
-// Función para alternar entre vista de paciente y doctor
 function toggleUserView() {
     if (currentView === 'patient') {
         // Cambiar a vista de doctor
         document.body.style.background = '#f0f4f8';
-        document.getElementById('doctorView').style.display = 'block';
         
-        // Ocultar elementos de la vista de paciente
+        // Ocultar TODOS los elementos de la vista de paciente
+        const pacienteHeader = document.querySelector('body > header'); // Selecciona el header principal
+        if (pacienteHeader) {
+            pacienteHeader.style.display = 'none';
+        }
+        
         document.getElementById('citasList').style.display = 'none';
         document.getElementById('filterSection').style.display = 'none';
         document.getElementById('tratamientosSection').style.display = 'none';
         document.getElementById('helpSection').style.display = 'none';
         document.getElementById('videocallContainer').style.display = 'none';
+        document.querySelector('.menu').style.display = 'none'; // Ocultar menú de paciente
+        
+        // Mostrar la vista del doctor
+        document.getElementById('doctorView').style.display = 'block';
         
         // Actualizar el botón
         document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Paciente';
@@ -888,10 +895,19 @@ function toggleUserView() {
     } else {
         // Cambiar a vista de paciente
         document.body.style.background = '#f5f7fa';
-        document.getElementById('doctorView').style.display = 'none';
         
         // Mostrar elementos de la vista de paciente
-        showCitas(); // Volver a la vista de citas del paciente
+        const pacienteHeader = document.querySelector('body > header');
+        if (pacienteHeader) {
+            pacienteHeader.style.display = 'flex'; // O 'block' según sea el display original
+        }
+        document.querySelector('.menu').style.display = 'flex'; // Mostrar menú de paciente
+        
+        // Ocultar vista del doctor
+        document.getElementById('doctorView').style.display = 'none';
+        
+        // Mostrar sección de citas
+        showCitas();
         
         // Actualizar el botón
         document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor';
@@ -1310,6 +1326,107 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 sendDoctorMessage();
             }
+        });
+    }
+});
+
+// Función para asegurar que los campos de prescripción sean interactivos
+function enablePrescriptionFields() {
+    // Asegurar que los campos de entrada sean editables
+    const diagnosisInput = document.getElementById('diagnosisInput');
+    const recommendationsInput = document.getElementById('recommendationsInput');
+    const followUpDate = document.getElementById('followUpDate');
+    
+    if (diagnosisInput) {
+        diagnosisInput.removeAttribute('readonly');
+        diagnosisInput.addEventListener('click', function(e) {
+            e.stopPropagation(); // Evitar que el clic se propague
+        });
+    }
+    
+    if (recommendationsInput) {
+        recommendationsInput.removeAttribute('readonly');
+        recommendationsInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    if (followUpDate) {
+        followUpDate.removeAttribute('readonly');
+        followUpDate.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // También habilitar los campos de medicamentos existentes
+    const medicationInputs = document.querySelectorAll('.medication-name, .medication-instructions');
+    medicationInputs.forEach(input => {
+        input.removeAttribute('readonly');
+        input.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+}
+
+// Mejorar la función switchDoctorTab para asegurar interactividad
+function switchDoctorTab(tabName) {
+    const tabs = document.querySelectorAll('#doctorVideocallContainer .tab');
+    const tabContents = document.querySelectorAll('#doctorVideocallContainer .tab-content');
+    
+    tabs.forEach(tab => tab.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    document.querySelector(`#doctorVideocallContainer .tab:nth-child(${tabName === 'chat' ? 1 : tabName === 'prescription' ? 2 : 3})`).classList.add('active');
+    document.getElementById(`doctor${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).classList.add('active');
+    
+    // Si estamos cambiando a la pestaña de prescripción, asegurar que los campos sean interactivos
+    if (tabName === 'prescription') {
+        setTimeout(enablePrescriptionFields, 100); // Pequeño retraso para asegurar que el DOM esté listo
+    }
+}
+
+// También modificar la función openDoctorVideoCall para incluir inicialización de campos
+function openDoctorVideoCall(patientId) {
+    // Código existente...
+    
+    // Asegurar que los campos de prescripción sean interactivos después de cargar
+    setTimeout(enablePrescriptionFields, 500);
+    
+    // El resto del código existente...
+}
+
+// Añade al inicio del documento, después de cargar el DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicialización existente...
+    
+    // Inicializar vista de prescripción
+    const prescriptionTab = document.querySelector('#doctorVideocallContainer .tab:nth-child(2)');
+    if (prescriptionTab) {
+        prescriptionTab.addEventListener('click', function() {
+            switchDoctorTab('prescription');
+        });
+    }
+    
+    // Inicializar los campos existentes
+    enablePrescriptionFields();
+    
+    // Asegurar que el botón para añadir medicamentos funcione
+    const addMedicationBtn = document.querySelector('.add-medication');
+    if (addMedicationBtn) {
+        addMedicationBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addMedicationField();
+            // Re-habilitar los campos después de añadir uno nuevo
+            setTimeout(enablePrescriptionFields, 100);
+        });
+    }
+    
+    // Asegurar que el botón de guardar funcione
+    const saveBtn = document.querySelector('.btn-save-prescription');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            savePrescription();
         });
     }
 });

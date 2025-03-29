@@ -11,6 +11,12 @@
 <body>
     <!-- Cabecera con información de usuario y notificaciones -->
    <!-- Reemplazar las imágenes faltantes con iconos Font Awesome -->
+        <!-- Botón para cambiar entre vista paciente/doctor (añadir justo antes del cierre del body) -->
+        <div class="toggle-view-btn">
+            <button id="toggleViewBtn" onclick="toggleUserView()">
+                <i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor
+            </button>
+        </div>
 <header>
     <div class="logo">
         <!-- Reemplazar logo-placeholder.png con un icono -->
@@ -30,13 +36,6 @@
         </div>
     </div>
 </header>
-
-    <!-- Botón para cambiar entre vista paciente/doctor (añadir justo antes del cierre del body) -->
-    <div class="toggle-view-btn">
-        <button id="toggleViewBtn" onclick="toggleUserView()">
-            <i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor
-        </button>
-    </div>
     <!-- Menú principal de navegación -->
     <div class="menu">
         <div>

@@ -858,3 +858,458 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Los demás eventos ya están siendo configurados en la función setupModalEvents()
 });
+
+// Variables globales
+let currentView = 'patient'; // 'patient' o 'doctor'
+let doctorLocalStream;
+let doctorCallTimerInterval;
+let doctorCallSeconds = 0;
+let isDoctorMicOn = true;
+let isDoctorCameraOn = true;
+
+// Función para alternar entre vista de paciente y doctor
+function toggleUserView() {
+    if (currentView === 'patient') {
+        // Cambiar a vista de doctor
+        document.body.style.background = '#f0f4f8';
+        document.getElementById('doctorView').style.display = 'block';
+        
+        // Ocultar elementos de la vista de paciente
+        document.getElementById('citasList').style.display = 'none';
+        document.getElementById('filterSection').style.display = 'none';
+        document.getElementById('tratamientosSection').style.display = 'none';
+        document.getElementById('helpSection').style.display = 'none';
+        document.getElementById('videocallContainer').style.display = 'none';
+        
+        // Actualizar el botón
+        document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Paciente';
+        
+        currentView = 'doctor';
+    } else {
+        // Cambiar a vista de paciente
+        document.body.style.background = '#f5f7fa';
+        document.getElementById('doctorView').style.display = 'none';
+        
+        // Mostrar elementos de la vista de paciente
+        showCitas(); // Volver a la vista de citas del paciente
+        
+        // Actualizar el botón
+        document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor';
+        
+        currentView = 'patient';
+    }
+}
+
+// Funciones para las secciones del doctor
+function showDoctorCitas() {
+    document.getElementById('doctorConsultasList').style.display = 'block';
+    document.getElementById('doctorFilterSection').style.display = 'block';
+    
+    // Actualizar el menú activo
+    document.querySelectorAll('.doctor-menu a').forEach(link => link.classList.remove('active'));
+    document.querySelector('.doctor-menu a[onclick="showDoctorCitas()"]').classList.add('active');
+}
+
+function showDoctorPacientes() {
+    document.getElementById('doctorConsultasList').style.display = 'none';
+    document.getElementById('doctorFilterSection').style.display = 'none';
+    
+    // Actualizar el menú activo
+    document.querySelectorAll('.doctor-menu a').forEach(link => link.classList.remove('active'));
+    document.querySelector('.doctor-menu a[onclick="showDoctorPacientes()"]').classList.add('active');
+    
+    // Aquí se mostraría la lista de pacientes (no implementado en este ejemplo)
+    alert('Vista de Pacientes - Funcionalidad no implementada en este demo');
+}
+
+function showDoctorHistorial() {
+    document.getElementById('doctorConsultasList').style.display = 'none';
+    document.getElementById('doctorFilterSection').style.display = 'none';
+    
+    // Actualizar el menú activo
+    document.querySelectorAll('.doctor-menu a').forEach(link => link.classList.remove('active'));
+    document.querySelector('.doctor-menu a[onclick="showDoctorHistorial()"]').classList.add('active');
+    
+    // Aquí se mostraría el historial completo (no implementado en este ejemplo)
+    alert('Vista de Historial Médico - Funcionalidad no implementada en este demo');
+}
+
+// Función para iniciar videollamada desde la vista del doctor
+function openDoctorVideoCall(patientId) {
+    document.getElementById('doctorVideocallContainer').style.display = 'block';
+    
+    // Ocultar secciones del doctor
+    document.getElementById('doctorConsultasList').style.display = 'none';
+    document.getElementById('doctorFilterSection').style.display = 'none';
+    
+    // Solicitar acceso a cámara y micrófono
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function(stream) {
+                doctorLocalStream = stream;
+                
+                // Mostrar video del doctor
+                const doctorVideo = document.getElementById('doctorSelfVideo');
+                if (doctorVideo) {
+                    doctorVideo.srcObject = stream;
+                    doctorVideo.play().catch(err => console.error("Error reproduciendo video:", err));
+                }
+                
+                // Ocultar placeholder
+                document.getElementById('doctorSelfPlaceholder').classList.add('hidden');
+                
+                // Iniciar tiempo de llamada
+                startDoctorCallTimer();
+            })
+            .catch(function(error) {
+                console.error("Error accediendo a la cámara del doctor:", error);
+                alert("No se pudo acceder a la cámara. Verifique los permisos del navegador.");
+                
+                // Mostrar placeholder en caso de error
+                document.getElementById('doctorSelfPlaceholder').classList.remove('hidden');
+                
+                // Iniciar tiempo de llamada de todos modos
+                startDoctorCallTimer();
+            });
+    } else {
+        alert("Su navegador no soporta acceso a cámara y micrófono.");
+        document.getElementById('doctorSelfPlaceholder').classList.remove('hidden');
+        startDoctorCallTimer();
+    }
+}
+
+// Función para finalizar videollamada del doctor
+function endDoctorVideoCall() {
+    document.getElementById('doctorVideocallContainer').style.display = 'none';
+    
+    // Mostrar de nuevo la lista de consultas
+    document.getElementById('doctorConsultasList').style.display = 'block';
+    document.getElementById('doctorFilterSection').style.display = 'block';
+    
+    // Detener el temporizador
+    stopDoctorCallTimer();
+    
+    // Detener todas las pistas de video/audio
+    if (doctorLocalStream) {
+        doctorLocalStream.getTracks().forEach(track => track.stop());
+        doctorLocalStream = null;
+    }
+}
+
+// Funciones para controlar micrófono y cámara del doctor
+function toggleDoctorMic() {
+    if (!doctorLocalStream) return;
+    
+    const micBtn = document.querySelector('#doctorVideocallContainer .btn-mic');
+    
+    doctorLocalStream.getAudioTracks().forEach(track => {
+        track.enabled = !track.enabled;
+        isDoctorMicOn = track.enabled;
+    });
+    
+    if (isDoctorMicOn) {
+        micBtn.classList.add('active');
+        micBtn.classList.remove('muted');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    } else {
+        micBtn.classList.remove('active');
+        micBtn.classList.add('muted');
+        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+    }
+}
+
+function toggleDoctorCamera() {
+    if (!doctorLocalStream) return;
+    
+    const cameraBtn = document.querySelector('#doctorVideocallContainer .btn-camera');
+    
+    doctorLocalStream.getVideoTracks().forEach(track => {
+        track.enabled = !track.enabled;
+        isDoctorCameraOn = track.enabled;
+    });
+    
+    if (isDoctorCameraOn) {
+        cameraBtn.classList.add('active');
+        cameraBtn.classList.remove('off');
+        cameraBtn.innerHTML = '<i class="fas fa-video"></i>';
+        document.getElementById('doctorSelfPlaceholder').classList.add('hidden');
+    } else {
+        cameraBtn.classList.remove('active');
+        cameraBtn.classList.add('off');
+        cameraBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
+        document.getElementById('doctorSelfPlaceholder').classList.remove('hidden');
+    }
+}
+
+// Funciones para el tiempo de llamada
+function startDoctorCallTimer() {
+    doctorCallSeconds = 0;
+    
+    if (doctorCallTimerInterval) {
+        clearInterval(doctorCallTimerInterval);
+    }
+    
+    doctorCallTimerInterval = setInterval(updateDoctorCallTimer, 1000);
+    updateDoctorCallTimer();
+}
+
+function updateDoctorCallTimer() {
+    const hours = Math.floor(doctorCallSeconds / 3600);
+    const minutes = Math.floor((doctorCallSeconds % 3600) / 60);
+    const seconds = doctorCallSeconds % 60;
+    
+    const timeString = 
+        (hours > 0 ? String(hours).padStart(2, '0') + ':' : '') + 
+        String(minutes).padStart(2, '0') + ':' + 
+        String(seconds).padStart(2, '0');
+    
+    const timerElement = document.querySelector('#doctorVideocallContainer .call-timer');
+    if (timerElement) {
+        timerElement.textContent = timeString;
+    }
+    
+    doctorCallSeconds++;
+}
+
+function stopDoctorCallTimer() {
+    if (doctorCallTimerInterval) {
+        clearInterval(doctorCallTimerInterval);
+        doctorCallTimerInterval = null;
+    }
+}
+
+// Función para cambiar entre pestañas en la videollamada del doctor
+function switchDoctorTab(tabName) {
+    const tabs = document.querySelectorAll('#doctorVideocallContainer .tab');
+    const tabContents = document.querySelectorAll('#doctorVideocallContainer .tab-content');
+    
+    tabs.forEach(tab => tab.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    document.querySelector(`#doctorVideocallContainer .tab:nth-child(${tabName === 'chat' ? 1 : tabName === 'prescription' ? 2 : 3})`).classList.add('active');
+    document.getElementById(`doctor${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).classList.add('active');
+}
+
+// Función para enviar mensaje como doctor
+function sendDoctorMessage() {
+    const messageInput = document.getElementById('doctorMessageInput');
+    if (!messageInput) return;
+    
+    const message = messageInput.value.trim();
+    if (message === '') return;
+    
+    // Obtener la hora actual
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    // Crear elemento de mensaje
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message doctor';
+    messageElement.innerHTML = `
+        <span class="message-name">Dr. Carlos Martínez (Tú)</span>
+        <div class="message-bubble">${message}</div>
+        <span class="message-time">${timeString}</span>
+    `;
+    
+    // Agregar mensaje al chat
+    const chatMessages = document.getElementById('doctorChatMessages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageElement);
+        
+        // Limpiar input
+        messageInput.value = '';
+        
+        // Scroll al final del chat
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Simular respuesta del paciente después de un breve retraso
+        setTimeout(() => {
+            simulatePatientResponse();
+        }, 2000);
+    }
+}
+
+// Función para simular respuesta del paciente
+function simulatePatientResponse() {
+    const patientResponses = [
+        "Entiendo doctor, seguiré sus indicaciones.",
+        "¿Es necesario hacer algún tipo de estudio adicional?",
+        "¿Cuándo debería ver mejoría con este tratamiento?",
+        "Gracias por la explicación, doctor.",
+        "¿Hay alguna restricción de alimentos que deba seguir?"
+    ];
+    
+    const randomResponse = patientResponses[Math.floor(Math.random() * patientResponses.length)];
+    
+    // Obtener la hora actual
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    // Crear elemento de mensaje
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message patient';
+    messageElement.innerHTML = `
+        <span class="message-name">Juan Pérez</span>
+        <div class="message-bubble">${randomResponse}</div>
+        <span class="message-time">${timeString}</span>
+    `;
+    
+    // Agregar mensaje al chat
+    const chatMessages = document.getElementById('doctorChatMessages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageElement);
+        
+        // Scroll al final del chat
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+// Función para añadir campo de medicamento
+function addMedicationField() {
+    const medicationList = document.getElementById('medicationList');
+    if (!medicationList) return;
+    
+    const medicationItem = document.createElement('div');
+    medicationItem.className = 'medication-item';
+    medicationItem.innerHTML = `
+        <input type="text" placeholder="Nombre y dosis" class="medication-name">
+        <input type="text" placeholder="Indicaciones" class="medication-instructions">
+        <button class="remove-medication" onclick="removeMedicationField(this)"><i class="fas fa-times"></i></button>
+    `;
+    
+    medicationList.appendChild(medicationItem);
+}
+
+// Función para eliminar campo de medicamento
+function removeMedicationField(button) {
+    const medicationItem = button.closest('.medication-item');
+    if (medicationItem) {
+        medicationItem.remove();
+    }
+}
+
+// Función para guardar la prescripción
+function savePrescription() {
+    const diagnosis = document.getElementById('diagnosisInput').value.trim();
+    const recommendations = document.getElementById('recommendationsInput').value.trim();
+    const followUpDate = document.getElementById('followUpDate').value;
+    
+    if (!diagnosis) {
+        alert('Por favor, ingrese un diagnóstico');
+        return;
+    }
+    
+    // Recopilar medicamentos
+    const medications = [];
+    const medicationItems = document.querySelectorAll('.medication-item');
+    
+    medicationItems.forEach(item => {
+        const name = item.querySelector('.medication-name').value.trim();
+        const instructions = item.querySelector('.medication-instructions').value.trim();
+        
+        if (name) {
+            medications.push({ name, instructions });
+        }
+    });
+    
+    if (medications.length === 0) {
+        alert('Por favor, añada al menos un medicamento');
+        return;
+    }
+    
+    // En una aplicación real, aquí se enviaría la prescripción al servidor
+    console.log('Prescripción guardada:', { diagnosis, medications, recommendations, followUpDate });
+    
+    // Simulación de guardado exitoso
+    alert('Prescripción guardada y enviada al paciente correctamente');
+    
+    // Actualizar la prescripción visible para el paciente
+    updatePatientPrescription(diagnosis, medications, recommendations);
+    
+    // Cambiar a la pestaña de chat
+    switchDoctorTab('chat');
+    
+    // Enviar mensaje automático al paciente
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message doctor';
+    messageElement.innerHTML = `
+        <span class="message-name">Dr. Carlos Martínez (Tú)</span>
+        <div class="message-bubble">He actualizado tu receta médica. Puedes verla en la sección de prescripción.</div>
+        <span class="message-time">${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')}</span>
+    `;
+    
+    const chatMessages = document.getElementById('doctorChatMessages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+// Función para actualizar la prescripción visible para el paciente
+function updatePatientPrescription(diagnosis, medications, recommendations) {
+    // Esta función simula la actualización de la prescripción que vería el paciente
+    const diagnosticoElement = document.getElementById('diagnostico');
+    if (diagnosticoElement) {
+        diagnosticoElement.textContent = diagnosis;
+    }
+    
+    const medicamentosElement = document.getElementById('medicamentos');
+    if (medicamentosElement) {
+        let medicationsHtml = '';
+        medications.forEach(med => {
+            medicationsHtml += `<li>${med.name} - ${med.instructions}</li>`;
+        });
+        medicamentosElement.innerHTML = medicationsHtml;
+    }
+    
+    const recomendacionesElement = document.getElementById('recomendaciones');
+    if (recomendacionesElement) {
+        const recsArray = recommendations.split('\n').filter(rec => rec.trim() !== '');
+        let recsHtml = '';
+        
+        if (recsArray.length > 0) {
+            recsArray.forEach(rec => {
+                recsHtml += `<li>${rec}</li>`;
+            });
+        } else {
+            recsHtml = '<li>Sin recomendaciones específicas</li>';
+        }
+        
+        recomendacionesElement.innerHTML = recsHtml;
+    }
+}
+
+// Función para mostrar historial del paciente
+function showPatientHistory(patientId) {
+    alert(`Mostrando historial del paciente ID: ${patientId}`);
+    // En una implementación real, aquí se cargaría el historial del paciente específico
+}
+
+// Aplicar filtros para la vista del doctor
+function aplicarFiltrosDoctor() {
+    const fecha = document.getElementById('doctorFilterDate')?.value;
+    const estado = document.getElementById('doctorFilterStatus')?.value;
+    
+    alert(`Filtrando consultas para doctor por: Fecha: ${fecha || 'Todas'}, Estado: ${estado === 'all' ? 'Todos' : estado}`);
+    // En una implementación real, aquí se filtrarían las consultas
+}
+
+// Añadir esta función a las inicializaciones del DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializaciones existentes...
+    
+    // Inicializar la vista del doctor
+    const doctorMessageInput = document.getElementById('doctorMessageInput');
+    if (doctorMessageInput) {
+        doctorMessageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendDoctorMessage();
+            }
+        });
+    }
+});

@@ -31,6 +31,12 @@
     </div>
 </header>
 
+    <!-- Botón para cambiar entre vista paciente/doctor (añadir justo antes del cierre del body) -->
+    <div class="toggle-view-btn">
+        <button id="toggleViewBtn" onclick="toggleUserView()">
+            <i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor
+        </button>
+    </div>
     <!-- Menú principal de navegación -->
     <div class="menu">
         <div>
@@ -434,4 +440,289 @@
         </div>
     </div>
 </body>
+<!-- Vista del Doctor (inicialmente oculta) -->
+<div id="doctorView" class="doctor-view-container" style="display: none;">
+    <!-- Cabecera del doctor -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-hospital-alt fa-2x"></i>
+            <h1>MediConsulta <span class="doctor-badge">Doctor</span></h1>
+        </div>
+        <div class="user-actions">
+            <div class="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="user-profile">
+                <i class="fas fa-user-md"></i>
+                <span>Dr. Carlos Martínez</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menú principal del doctor -->
+    <div class="menu doctor-menu">
+        <div>
+            <a href="#" class="active" onclick="showDoctorCitas()"><i class="fas fa-calendar-check"></i> Consultas Programadas</a>
+            <a href="#" onclick="showDoctorPacientes()"><i class="fas fa-users"></i> Mis Pacientes</a>
+            <a href="#" onclick="showDoctorHistorial()"><i class="fas fa-history"></i> Historial Médico</a>
+        </div>
+        <div class="menu-right">
+            <span class="doctor-status active">
+                <i class="fas fa-circle"></i> Disponible
+            </span>
+        </div>
+    </div>
+
+    <!-- Filtros para consultas -->
+    <div id="doctorFilterSection" class="filter-section">
+        <h2>Consultas Programadas</h2>
+        <div class="filters">
+            <div class="filter-group">
+                <label for="doctorFilterDate">Fecha:</label>
+                <input type="date" id="doctorFilterDate">
+            </div>
+            <div class="filter-group">
+                <label for="doctorFilterStatus">Estado:</label>
+                <select id="doctorFilterStatus">
+                    <option value="all">Todos</option>
+                    <option value="pending">Pendientes</option>
+                    <option value="completed">Completadas</option>
+                </select>
+            </div>
+            <button onclick="aplicarFiltrosDoctor()" class="btn-filtrar">
+                <i class="fas fa-filter"></i> Aplicar filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Lista de consultas del doctor -->
+    <div id="doctorConsultasList" class="lista">
+        <!-- Consulta 1 -->
+        <div class="ficha">
+            <div class="cita-info">
+                <div class="cita-fecha">
+                    <i class="fas fa-calendar-day"></i>
+                    <strong>12/04/2025</strong>
+                </div>
+                <div class="cita-hora">
+                    <i class="fas fa-clock"></i>
+                    <span>14:30</span>
+                </div>
+                <div class="cita-paciente">
+                    <i class="fas fa-user"></i>
+                    <span>Juan Pérez - CC 1234567890</span>
+                </div>
+                <div class="cita-motivo">
+                    <i class="fas fa-notes-medical"></i>
+                    <span>Dolor abdominal y fiebre</span>
+                </div>
+                <div class="cita-tipo">
+                    <i class="fas fa-video"></i>
+                    <span>Consulta Virtual</span>
+                </div>
+            </div>
+            <div class="cita-acciones">
+                <button onclick="openDoctorVideoCall(1)" class="btn-iniciar">
+                    <i class="fas fa-play-circle"></i> Iniciar
+                </button>
+                <button onclick="showPatientHistory(1)" class="btn-history" title="Ver historial del paciente">
+                    <i class="fas fa-file-medical"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Consulta 2 -->
+        <div class="ficha">
+            <div class="cita-info">
+                <div class="cita-fecha">
+                    <i class="fas fa-calendar-day"></i>
+                    <strong>12/04/2025</strong>
+                </div>
+                <div class="cita-hora">
+                    <i class="fas fa-clock"></i>
+                    <span>16:00</span>
+                </div>
+                <div class="cita-paciente">
+                    <i class="fas fa-user"></i>
+                    <span>María González - CC 9876543210</span>
+                </div>
+                <div class="cita-motivo">
+                    <i class="fas fa-notes-medical"></i>
+                    <span>Seguimiento tratamiento hipertensión</span>
+                </div>
+                <div class="cita-tipo">
+                    <i class="fas fa-video"></i>
+                    <span>Consulta Virtual</span>
+                </div>
+            </div>
+            <div class="cita-acciones">
+                <button onclick="openDoctorVideoCall(2)" class="btn-iniciar">
+                    <i class="fas fa-play-circle"></i> Iniciar
+                </button>
+                <button onclick="showPatientHistory(2)" class="btn-history" title="Ver historial del paciente">
+                    <i class="fas fa-file-medical"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Videollamada del doctor (inicialmente oculta) -->
+    <div id="doctorVideocallContainer" class="videocall-container">
+        <div class="videocall-header">
+            <div class="call-info">
+                <h3>Consulta con Juan Pérez</h3>
+                <span class="call-timer">00:00:00</span>
+            </div>
+            <div class="call-actions">
+                <button class="btn-mic active" onclick="toggleDoctorMic()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="btn-camera active" onclick="toggleDoctorCamera()">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="btn-end-call" onclick="endDoctorVideoCall()">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="videocall-content">
+            <div class="video-area">
+                <div class="main-video">
+                    <video id="patientVideo" autoplay muted class="hidden"></video>
+                    <div id="patientPlaceholder" class="video-placeholder patient">
+                        <i class="fas fa-user"></i>
+                        <span>Juan Pérez</span>
+                    </div>
+                </div>
+                <div class="self-video">
+                    <video id="doctorSelfVideo" autoplay muted></video>
+                    <div id="doctorSelfPlaceholder" class="video-placeholder doctor hidden">
+                        <i class="fas fa-user-md"></i>
+                        <span>Dr. Carlos Martínez</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="doctor-sidebar">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchDoctorTab('chat')">Chat</div>
+                    <div class="tab" onclick="switchDoctorTab('prescription')">Prescripción</div>
+                    <div class="tab" onclick="switchDoctorTab('history')">Historial</div>
+                </div>
+                
+                <!-- Tab de Chat -->
+                <div id="doctorChatTab" class="tab-content active">
+                    <div id="doctorChatMessages" class="chat-messages">
+                        <div class="message doctor">
+                            <span class="message-name">Dr. Carlos Martínez (Tú)</span>
+                            <div class="message-bubble">Hola Juan, ¿cómo te encuentras hoy?</div>
+                            <span class="message-time">14:32</span>
+                        </div>
+                        <div class="message patient">
+                            <span class="message-name">Juan Pérez</span>
+                            <div class="message-bubble">Buenos días doctor. Tengo dolor abdominal y algo de fiebre desde ayer.</div>
+                            <span class="message-time">14:33</span>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <textarea id="doctorMessageInput" placeholder="Escribe un mensaje..."></textarea>
+                        <button onclick="sendDoctorMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Tab de Prescripción -->
+                <div id="doctorPrescriptionTab" class="tab-content">
+                    <div class="prescription-editor">
+                        <h4>Nueva Prescripción</h4>
+                        
+                        <div class="form-group">
+                            <label for="diagnosisInput">Diagnóstico:</label>
+                            <input type="text" id="diagnosisInput" placeholder="Ej: Gastritis aguda">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Medicamentos:</label>
+                            <div class="medication-list" id="medicationList">
+                                <div class="medication-item">
+                                    <input type="text" placeholder="Nombre y dosis" class="medication-name">
+                                    <input type="text" placeholder="Indicaciones" class="medication-instructions">
+                                    <button class="remove-medication"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <button class="add-medication" onclick="addMedicationField()">
+                                <i class="fas fa-plus"></i> Añadir medicamento
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="recommendationsInput">Recomendaciones:</label>
+                            <textarea id="recommendationsInput" rows="3" placeholder="Ej: Dieta blanda, evitar alimentos ácidos y picantes"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="followUpDate">Próximo control:</label>
+                            <input type="date" id="followUpDate">
+                        </div>
+                        
+                        <div class="prescription-actions">
+                            <button class="btn-save-prescription" onclick="savePrescription()">
+                                <i class="fas fa-save"></i> Guardar y enviar al paciente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab de Historial -->
+                <div id="doctorHistoryTab" class="tab-content">
+                    <div class="patient-history">
+                        <h4>Historial Clínico - Juan Pérez</h4>
+                        
+                        <div class="history-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Edad:</span>
+                                <span class="summary-value">35 años</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Alergias:</span>
+                                <span class="summary-value">Penicilina</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Enfermedades crónicas:</span>
+                                <span class="summary-value">Ninguna</span>
+                            </div>
+                        </div>
+                        
+                        <h5>Consultas anteriores</h5>
+                        <div class="previous-consultations">
+                            <div class="consultation-item">
+                                <div class="consultation-header">
+                                    <span class="consultation-date">05/03/2025</span>
+                                    <span class="consultation-doctor">Dr. Carlos Martínez</span>
+                                </div>
+                                <div class="consultation-body">
+                                    <p><strong>Diagnóstico:</strong> Resfriado común</p>
+                                    <p><strong>Tratamiento:</strong> Paracetamol 500mg, reposo</p>
+                                </div>
+                            </div>
+                            <div class="consultation-item">
+                                <div class="consultation-header">
+                                    <span class="consultation-date">10/01/2025</span>
+                                    <span class="consultation-doctor">Dra. Laura Sánchez</span>
+                                </div>
+                                <div class="consultation-body">
+                                    <p><strong>Diagnóstico:</strong> Dolor lumbar</p>
+                                    <p><strong>Tratamiento:</strong> Ibuprofeno 400mg, compresas calientes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </html>
+

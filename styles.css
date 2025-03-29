@@ -1197,3 +1197,238 @@ header {
         justify-content: center;
     }
 }
+/* Estilos para el botón de cambio de vista */
+.toggle-view-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 900;
+}
+
+.toggle-view-btn button {
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.toggle-view-btn button:hover {
+    background-color: #004494;
+}
+
+/* Estilos para la vista del doctor */
+.doctor-badge {
+    background-color: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.doctor-menu {
+    background-color: #343a40;
+}
+
+.doctor-status {
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.doctor-status i {
+    margin-right: 5px;
+    font-size: 0.7rem;
+}
+
+.doctor-status.active i {
+    color: #28a745;
+}
+
+.btn-iniciar {
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.btn-iniciar:hover {
+    background-color: #0069d9;
+}
+
+.btn-history {
+    background-color: #6c757d;
+    color: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-history:hover {
+    background-color: #5a6268;
+}
+
+.cita-paciente {
+    display: flex;
+    align-items: center;
+}
+
+.cita-tipo {
+    display: flex;
+    align-items: center;
+    background-color: #e7f5ff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+/* Estilos para el editor de prescripciones */
+.doctor-sidebar {
+    flex: 1;
+    max-width: 400px;
+    background: white;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #ddd;
+}
+
+.prescription-editor {
+    padding: 15px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.prescription-editor h4 {
+    margin-bottom: 15px;
+    color: #0056b3;
+    font-size: 1.1rem;
+}
+
+.medication-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.medication-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.medication-name {
+    flex: 1;
+}
+
+.medication-instructions {
+    flex: 2;
+}
+
+.remove-medication {
+    background: #f8d7da;
+    color: #721c24;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-medication {
+    background: #e2f3ff;
+    color: #0056b3;
+    border: 1px dashed #0056b3;
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.prescription-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-save-prescription {
+    background: #0056b3;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.btn-save-prescription i {
+    margin-right: 8px;
+}
+
+/* Estilos para el historial del paciente */
+.patient-history {
+    padding: 15px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.history-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.summary-item {
+    margin-bottom: 8px;
+}
+
+.summary-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.previous-consultations {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.consultation-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.consultation-header {
+    background: #f5f5f5;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.consultation-body {
+    padding: 10px;
+}
+
+.consultation-body p {
+    margin-bottom: 5px;
+}

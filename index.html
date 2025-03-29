@@ -5,30 +5,470 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Citas Médicas</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="menu">
-        <div>
-            <a href="#">Mis Citas</a>
-            <a href="#">Tratamientos</a>
+    <!-- Barra de navegación superior -->
+    <header>
+        <div class="logo">
+            <img src="logo-placeholder.png" alt="Logo EPS" class="logo-img">
+            <h1>EPS Salud</h1>
         </div>
-        <button onclick="window.location.href='./Paciente_Agendar/agendar.html'">+ Agendar</button>
+        <div class="user-info">
+            <span id="user-name">Juan Pérez</span>
+            <button id="logout-btn" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Menú principal -->
+    <div class="menu">
+        <div class="nav-tabs">
+            <a href="#" class="active" id="tab-citas"><i class="fas fa-calendar-check"></i> Mis Citas</a>
+            <a href="#" id="tab-tratamientos"><i class="fas fa-pills"></i> Tratamientos</a>
+            <a href="#" id="tab-ayuda"><i class="fas fa-question-circle"></i> Ayuda</a>
+        </div>
+        <button id="agendar-btn" onclick="window.location.href='./Paciente_Agendar/agendar.html'">
+            <i class="fas fa-plus"></i> Agendar
+        </button>
     </div>
-    <div class="lista">
-        <div class="ficha" onclick="openModal()">
-            <div>
-                <strong>12/04/2025 - 14:30</strong><br>
-                Especialista: Medico General
+
+    <!-- Área de notificaciones -->
+    <div id="notification-area" class="notification-hidden">
+        <i class="fas fa-bell notification-icon"></i>
+        <span id="notification-message">Tiene una nueva notificación</span>
+        <button id="notification-close"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Filtros para citas -->
+    <div class="filtros">
+        <div class="filtro-group">
+            <label for="filtro-fecha">Filtrar por fecha:</label>
+            <input type="date" id="filtro-fecha">
+        </div>
+        <div class="filtro-group">
+            <label for="filtro-especialista">Filtrar por especialista:</label>
+            <select id="filtro-especialista">
+                <option value="">Todos</option>
+                <option value="general">Médico General</option>
+                <option value="cardiologo">Cardiólogo</option>
+                <option value="dermatologo">Dermatólogo</option>
+                <option value="neurologo">Neurólogo</option>
+            </select>
+        </div>
+        <button id="aplicar-filtros">Aplicar filtros</button>
+        <button id="limpiar-filtros">Limpiar filtros</button>
+    </div>
+
+    <!-- Lista de citas programadas -->
+    <div class="seccion-contenido active" id="seccion-citas">
+        <h2>Mis Citas Programadas</h2>
+        <div class="lista">
+            <!-- Cita 1 -->
+            <div class="ficha">
+                <div class="ficha-info">
+                    <div class="ficha-fecha">
+                        <i class="fas fa-calendar"></i>
+                        <strong>12/04/2025</strong>
+                    </div>
+                    <div class="ficha-hora">
+                        <i class="fas fa-clock"></i>
+                        <span>14:30</span>
+                    </div>
+                    <div class="ficha-especialista">
+                        <i class="fas fa-user-md"></i>
+                        <span>Dr. Carlos Martínez</span>
+                    </div>
+                    <div class="ficha-especialidad">
+                        <i class="fas fa-stethoscope"></i>
+                        <span>Médico General</span>
+                    </div>
+                    <div class="ficha-motivo">
+                        <i class="fas fa-comment-medical"></i>
+                        <span>Dolor abdominal y fiebre</span>
+                    </div>
+                    <div class="ficha-estado">
+                        <span class="estado-pendiente">Pendiente</span>
+                    </div>
+                </div>
+                <div class="ficha-acciones">
+                    <button class="accion-btn entrar-btn" onclick="openModal(1)" title="Entrar a consulta">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="accion-btn reagendar-btn" onclick="openReagendarModal(1)" title="Reagendar cita">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                    <button class="accion-btn cancelar-btn" onclick="openCancelarModal(1)" title="Cancelar cita">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cita 2 -->
+            <div class="ficha">
+                <div class="ficha-info">
+                    <div class="ficha-fecha">
+                        <i class="fas fa-calendar"></i>
+                        <strong>20/04/2025</strong>
+                    </div>
+                    <div class="ficha-hora">
+                        <i class="fas fa-clock"></i>
+                        <span>10:15</span>
+                    </div>
+                    <div class="ficha-especialista">
+                        <i class="fas fa-user-md"></i>
+                        <span>Dra. Laura Gómez</span>
+                    </div>
+                    <div class="ficha-especialidad">
+                        <i class="fas fa-stethoscope"></i>
+                        <span>Dermatología</span>
+                    </div>
+                    <div class="ficha-motivo">
+                        <i class="fas fa-comment-medical"></i>
+                        <span>Erupción cutánea en brazos</span>
+                    </div>
+                    <div class="ficha-estado">
+                        <span class="estado-pendiente">Pendiente</span>
+                    </div>
+                </div>
+                <div class="ficha-acciones">
+                    <button class="accion-btn entrar-btn" onclick="openModal(2)" title="Entrar a consulta">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="accion-btn reagendar-btn" onclick="openReagendarModal(2)" title="Reagendar cita">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                    <button class="accion-btn cancelar-btn" onclick="openCancelarModal(2)" title="Cancelar cita">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
-    <div id="modal" class="modal">
-        <p>¿Deseas entrar a la consulta?</p>
-        <button onclick="openVideoCall()">Entrar a la consulta</button>
-        <button onclick="closeModal()">Cancelar</button>
+
+    <!-- Sección de tratamientos -->
+    <div class="seccion-contenido" id="seccion-tratamientos">
+        <h2>Mis Tratamientos</h2>
+        <div class="filtros-tratamientos">
+            <div class="filtro-group">
+                <label for="filtro-fecha-tratamiento">Filtrar por fecha:</label>
+                <input type="date" id="filtro-fecha-tratamiento">
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-especialista-tratamiento">Filtrar por especialista:</label>
+                <select id="filtro-especialista-tratamiento">
+                    <option value="">Todos</option>
+                    <option value="general">Médico General</option>
+                    <option value="cardiologo">Cardiólogo</option>
+                    <option value="dermatologo">Dermatólogo</option>
+                    <option value="neurologo">Neurólogo</option>
+                </select>
+            </div>
+            <button id="aplicar-filtros-tratamiento">Aplicar filtros</button>
+        </div>
+
+        <div class="lista-tratamientos">
+            <!-- Tratamiento 1 -->
+            <div class="tratamiento-tarjeta">
+                <div class="tratamiento-header">
+                    <div>
+                        <i class="fas fa-calendar"></i>
+                        <span>05/03/2025</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-user-md"></i>
+                        <span>Dr. Carlos Martínez - Médico General</span>
+                    </div>
+                </div>
+                <div class="tratamiento-body">
+                    <h3>Diagnóstico:</h3>
+                    <p>Gastroenteritis aguda</p>
+                    <h3>Prescripción:</h3>
+                    <ul>
+                        <li>Omeprazol 20mg - 1 cápsula cada 24 horas (7 días)</li>
+                        <li>Simeticona 80mg - 1 tableta cada 8 horas (5 días)</li>
+                        <li>Hidratación oral constante</li>
+                    </ul>
+                    <h3>Recomendaciones:</h3>
+                    <p>Dieta blanda, sin lácteos ni irritantes. Reposo de 48 horas. Control en 10 días si persisten síntomas.</p>
+                </div>
+                <div class="tratamiento-footer">
+                    <button class="tratamiento-btn imprimir-btn">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="tratamiento-btn descargar-btn">
+                        <i class="fas fa-download"></i> Descargar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tratamiento 2 -->
+            <div class="tratamiento-tarjeta">
+                <div class="tratamiento-header">
+                    <div>
+                        <i class="fas fa-calendar"></i>
+                        <span>15/02/2025</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-user-md"></i>
+                        <span>Dra. Laura Gómez - Dermatología</span>
+                    </div>
+                </div>
+                <div class="tratamiento-body">
+                    <h3>Diagnóstico:</h3>
+                    <p>Dermatitis de contacto</p>
+                    <h3>Prescripción:</h3>
+                    <ul>
+                        <li>Crema Hidrocortisona 1% - Aplicar en área afectada 2 veces al día (10 días)</li>
+                        <li>Loratadina 10mg - 1 tableta cada 24 horas (7 días)</li>
+                    </ul>
+                    <h3>Recomendaciones:</h3>
+                    <p>Evitar el contacto con detergentes sin guantes. Usar jabón neutro y crema hidratante. Acudir a control en 15 días.</p>
+                </div>
+                <div class="tratamiento-footer">
+                    <button class="tratamiento-btn imprimir-btn">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="tratamiento-btn descargar-btn">
+                        <i class="fas fa-download"></i> Descargar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de ayuda -->
+    <div class="seccion-contenido" id="seccion-ayuda">
+        <h2>Ayuda y Preguntas Frecuentes</h2>
+        
+        <div class="accordion">
+            <div class="accordion-item">
+                <div class="accordion-header">¿Cómo agendo una cita?</div>
+                <div class="accordion-content">
+                    <p>Para agendar una cita, debes hacer clic en el botón verde "Agendar" ubicado en la esquina superior derecha. Luego, sigue estos pasos:</p>
+                    <ol>
+                        <li>Selecciona el tipo de especialista</li>
+                        <li>Escoge la fecha y hora disponible</li>
+                        <li>Escribe el motivo de tu consulta</li>
+                        <li>Haz clic en "Agendar y Pagar"</li>
+                        <li>Selecciona tu método de pago preferido</li>
+                        <li>Confirma el pago</li>
+                    </ol>
+                    <p>Recibirás una notificación por correo y celular confirmando tu cita.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header">¿Cómo cancelo o reagendo una cita?</div>
+                <div class="accordion-content">
+                    <p>Para cancelar una cita, localiza la cita en la sección "Mis Citas" y haz clic en el ícono de basura (cancelar). Deberás proporcionar un motivo para la cancelación y confirmar. Tu dinero será reembolsado al mismo método de pago usado.</p>
+                    <p>Para reagendar, haz clic en el ícono de calendario (reagendar) y selecciona una nueva fecha y hora disponible.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header">¿Cómo entro a una consulta virtual?</div>
+                <div class="accordion-content">
+                    <p>Cuando sea el momento de tu consulta, recibirás una notificación. Puedes entrar de dos maneras:</p>
+                    <ul>
+                        <li>Haciendo clic en el enlace de la notificación</li>
+                        <li>Accediendo a "Mis Citas" y haciendo clic en el ícono de videollamada en la cita correspondiente</li>
+                    </ul>
+                    <p>Una vez dentro, tendrás acceso a la videollamada y al chat con tu médico.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header">¿Cómo puedo acceder a mis tratamientos anteriores?</div>
+                <div class="accordion-content">
+                    <p>Para ver tus tratamientos anteriores, haz clic en la pestaña "Tratamientos" en el menú principal. Ahí encontrarás todas tus consultas previas con sus diagnósticos y prescripciones.</p>
+                    <p>Puedes filtrar por fecha o especialista para encontrar más fácilmente un tratamiento específico, y también puedes descargar o imprimir las recetas médicas.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header">¿Qué hago si tengo problemas de conexión durante la consulta?</div>
+                <div class="accordion-content">
+                    <p>Si experimentas problemas de conexión durante una consulta virtual:</p>
+                    <ol>
+                        <li>Intenta primero desactivar tu cámara para usar solo audio (esto reduce el consumo de datos)</li>
+                        <li>Si la videollamada sigue fallando, utiliza el chat para comunicarte con el médico</li>
+                        <li>En caso de desconexión total, el sistema intentará reconectar automáticamente</li>
+                        <li>Si no puedes reconectar, recibirás un mensaje para reagendar sin costo adicional</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para entrar a consulta -->
+    <div id="consulta-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Entrar a consulta</h3>
+            <p>¿Deseas entrar a la videoconsulta con <span id="modal-doctor-name">Dr. Carlos Martínez</span>?</p>
+            <div class="modal-buttons">
+                <button id="entrar-consulta-btn" onclick="startVideoCall()">Entrar a la consulta</button>
+                <button class="cancelar-btn" onclick="closeAllModals()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para videollamada -->
+    <div id="videollamada-modal" class="modal-full">
+        <div class="modal-full-content">
+            <div class="videollamada-header">
+                <h3>Consulta con <span id="videollamada-doctor">Dr. Carlos Martínez</span></h3>
+                <button id="finalizar-llamada" onclick="endVideoCall()">Finalizar consulta</button>
+            </div>
+            <div class="videollamada-container">
+                <div class="video-area">
+                    <div class="video-principal">
+                        <div class="video-placeholder">
+                            <i class="fas fa-user-md"></i>
+                            <p>Video del médico</p>
+                        </div>
+                    </div>
+                    <div class="video-secundario">
+                        <div class="video-placeholder small">
+                            <i class="fas fa-user"></i>
+                            <p>Tu video</p>
+                        </div>
+                        <div class="video-controls">
+                            <button title="Activar/Desactivar Micrófono">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button title="Activar/Desactivar Cámara">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button title="Configuración">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-area">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message doctor">
+                            <div class="message-header">
+                                <span class="message-sender">Dr. Carlos Martínez</span>
+                                <span class="message-time">14:31</span>
+                            </div>
+                            <div class="message-body">Hola, bienvenido a la consulta. ¿En qué puedo ayudarte hoy?</div>
+                        </div>
+                        <div class="message patient">
+                            <div class="message-header">
+                                <span class="message-sender">Yo</span>
+                                <span class="message-time">14:32</span>
+                            </div>
+                            <div class="message-body">Hola doctor. Tengo dolor abdominal y algo de fiebre desde hace 2 días.</div>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <textarea id="chat-input-field" placeholder="Escribe un mensaje..."></textarea>
+                        <button id="send-message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="prescriptions-area" id="prescriptions-area">
+                <h4>Notas y Prescripciones del Médico</h4>
+                <div class="prescription-content" id="prescription-content">
+                    <p class="no-prescriptions">El médico aún no ha registrado prescripciones para esta consulta.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para reagendar cita -->
+    <div id="reagendar-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Reagendar Cita</h3>
+            <p>Selecciona una nueva fecha y hora para tu cita con <span id="reagendar-doctor-name">Dr. Carlos Martínez</span>:</p>
+            
+            <div class="reagendar-form">
+                <div class="form-group">
+                    <label for="nueva-fecha">Nueva fecha:</label>
+                    <input type="date" id="nueva-fecha" min="2025-03-29">
+                </div>
+                <div class="form-group">
+                    <label for="nueva-hora">Nueva hora:</label>
+                    <select id="nueva-hora">
+                        <option value="08:00">08:00 AM</option>
+                        <option value="08:30">08:30 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="09:30">09:30 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="10:30">10:30 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="11:30">11:30 AM</option>
+                        <option value="14:00">02:00 PM</option>
+                        <option value="14:30">02:30 PM</option>
+                        <option value="15:00">03:00 PM</option>
+                        <option value="15:30">03:30 PM</option>
+                        <option value="16:00">04:00 PM</option>
+                        <option value="16:30">04:30 PM</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="confirmar-reagendar" onclick="confirmarReagendar()">Confirmar</button>
+                <button class="cancelar-btn" onclick="closeAllModals()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cancelar cita -->
+    <div id="cancelar-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Cancelar Cita</h3>
+            <p>¿Estás seguro que deseas cancelar tu cita con <span id="cancelar-doctor-name">Dr. Carlos Martínez</span> del <span id="cancelar-fecha">12/04/2025</span>?</p>
+            
+            <div class="form-group">
+                <label for="motivo-cancelacion">Por favor, indícanos el motivo de la cancelación:</label>
+                <textarea id="motivo-cancelacion" rows="4" placeholder="Escribe aquí el motivo..."></textarea>
+            </div>
+            
+            <div class="reembolso-info">
+                <i class="fas fa-info-circle"></i>
+                <span>Se realizará un reembolso a tu método de pago original.</span>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="confirmar-cancelar" onclick="confirmarCancelacion()">Confirmar Cancelación</button>
+                <button class="cancelar-btn" onclick="closeAllModals()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay para modales -->
+    <div id="modal-overlay" onclick="closeAllModals()"></div>
+
+    <!-- Pantalla de login (normalmente estaría en otra página) -->
+    <div id="login-container" class="hidden">
+        <div class="login-form">
+            <h2>Acceso Pacientes</h2>
+            <div class="form-group">
+                <label for="cedula">Número de Cédula:</label>
+                <input type="text" id="cedula" placeholder="Ingresa tu cédula">
+            </div>
+            <div class="form-group">
+                <label for="correo">Correo Electrónico:</label>
+                <input type="email" id="correo" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" id="contrasena" placeholder="Ingresa tu contraseña">
+            </div>
+            <button id="login-btn">Iniciar Sesión</button>
+            <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
     </div>
 </body>
 </html>

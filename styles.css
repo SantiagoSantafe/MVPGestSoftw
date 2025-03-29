@@ -1076,6 +1076,18 @@ header {
     display: flex;
 }
 
+/* Estilos para los iconos que reemplazan imágenes */
+.logo i {
+    color: #0056b3;
+    margin-right: 10px;
+}
+
+.user-profile i.fa-user-circle {
+    font-size: 1.8rem;
+    color: #666;
+    margin-right: 8px;
+}
+
 .toggle-password {
     position: absolute;
     right: 10px;

@@ -3,44 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendar Cita Médica</title>
-    <link rel="stylesheet" href="agendarPaciente.css">
-    <script src="agendarPaciente.js" defer></script>
+    <title>Gestión de Citas Médicas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Agendar Cita Médica</h2>
-        <form id="agendarForm">
-            <label for="especialista">Tipo de Especialista:</label>
-            <select id="especialista" name="especialista" required>
-                <option value="general">Médico General</option>
-                <option value="cardiologo">Cardiólogo</option>
-                <option value="dermatologo">Dermatólogo</option>
-                <option value="neurologo">Neurólogo</option>
-            </select>
-            
-            <label for="fecha">Fecha y Hora:</label>
-            <input type="datetime-local" id="fecha" name="fecha" required>
-            
-            <label for="razon">Razón de la consulta:</label>
-            <textarea id="razon" name="razon" rows="4" required></textarea>
-            
-            <button type="button" onclick="openPaymentModal()">Agendar y Pagar</button>
-        </form>
-    </div>
-    
-    <div id="paymentModal" class="modal-overlay" onclick="closePaymentModal()">
-        <div class="modal" onclick="event.stopPropagation()">
-            <h2>Selecciona un método de pago</h2>
-            <div class="payment-options">
-                <label><input type="radio" name="pago" value="debito"> Débito/Crédito</label>
-                <label><input type="radio" name="pago" value="transferencia"> Transferencia</label>
-                <label><input type="radio" name="pago" value="paypal"> PayPal</label>
-                <label><input type="radio" name="pago" value="efecty"> Efecty</label>
-            </div>
-            <button onclick="confirmPayment()">Confirmar Pago</button>
-            <button onclick="closePaymentModal()">Cancelar</button>
+    <div class="menu">
+        <div>
+            <a href="#">Mis Citas</a>
+            <a href="#">Tratamientos</a>
         </div>
+        <button onclick="window.location.href='./Paciente_Agendar/agendar.html'">+ Agendar</button>
+    </div>
+    <div class="lista">
+        <div class="ficha" onclick="openModal()">
+            <div>
+                <strong>12/04/2025 - 14:30</strong><br>
+                Especialista: Medico General
+            </div>
+        </div>
+    </div>
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
+    <div id="modal" class="modal">
+        <p>¿Deseas entrar a la consulta?</p>
+        <button onclick="openVideoCall()">Entrar a la consulta</button>
+        <button onclick="closeModal()">Cancelar</button>
     </div>
 </body>
 </html>

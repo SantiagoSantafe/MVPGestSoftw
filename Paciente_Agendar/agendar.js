@@ -11,7 +11,7 @@ function confirmPayment() {
     if (selectedMethod) {
         alert(`Pago confirmado con método: ${selectedMethod.value}`);
         closePaymentModal();
-        window.location.href = "../Paciente_Principal/index.html";
+        window.location.href = "../index.html";
     } else {
         alert("Por favor, selecciona un método de pago.");
     }

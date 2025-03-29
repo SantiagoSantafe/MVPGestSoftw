@@ -673,3 +673,188 @@ function toggleFaq(element) {
         icon.className = answer.style.display === 'block' ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
     }
 }
+// Funciones para cambiar entre secciones
+function showCitas() {
+    document.getElementById('citasList').style.display = 'block';
+    document.getElementById('filterSection').style.display = 'block';
+    document.getElementById('tratamientosSection').style.display = 'none';
+    document.getElementById('helpSection').style.display = 'none';
+    
+    // Actualizar el menú activo
+    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
+    document.querySelector('.menu a[onclick="showCitas()"]').classList.add('active');
+}
+
+function showTratamientos() {
+    document.getElementById('citasList').style.display = 'none';
+    document.getElementById('filterSection').style.display = 'none';
+    document.getElementById('tratamientosSection').style.display = 'block';
+    document.getElementById('helpSection').style.display = 'none';
+    
+    // Actualizar el menú activo
+    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
+    document.querySelector('.menu a[onclick="showTratamientos()"]').classList.add('active');
+    
+    // Cargar los tratamientos (en una implementación real se cargarían desde el servidor)
+    loadTratamientos();
+}
+
+function showHelp() {
+    document.getElementById('citasList').style.display = 'none';
+    document.getElementById('filterSection').style.display = 'none';
+    document.getElementById('tratamientosSection').style.display = 'none';
+    document.getElementById('helpSection').style.display = 'block';
+    
+    // Actualizar el menú activo
+    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
+    document.querySelector('.menu a[onclick="showHelp()"]').classList.add('active');
+}
+
+// Función para cargar datos de tratamientos
+function loadTratamientos() {
+    const tratamientosList = document.querySelector('.tratamientos-list');
+    if (!tratamientosList) return;
+    
+    // Limpiar lista existente
+    tratamientosList.innerHTML = '';
+    
+    // Datos de ejemplo de tratamientos
+    const tratamientos = [
+        {
+            fecha: '05/04/2025',
+            especialidad: 'Medicina General',
+            diagnostico: 'Gastritis aguda',
+            prescripcion: 'Omeprazol 20mg, Sucralfato suspensión',
+            indicaciones: 'Omeprazol: 1 cápsula en ayunas por 14 días. Sucralfato: 10ml antes de cada comida por 7 días.'
+        },
+        {
+            fecha: '20/03/2025',
+            especialidad: 'Cardiología',
+            diagnostico: 'Hipertensión arterial leve',
+            prescripcion: 'Losartán 50mg',
+            indicaciones: 'Tomar 1 tableta cada 24 horas. Controlar presión arterial diariamente.'
+        },
+        {
+            fecha: '10/02/2025',
+            especialidad: 'Medicina General',
+            diagnostico: 'Faringitis aguda',
+            prescripcion: 'Amoxicilina 500mg, Ibuprofeno 400mg',
+            indicaciones: 'Amoxicilina: 1 cápsula cada 8 horas por 7 días. Ibuprofeno: 1 tableta cada 8 horas si hay dolor.'
+        }
+    ];
+    
+    // Crear tarjetas de tratamientos
+    tratamientos.forEach(tratamiento => {
+        const card = document.createElement('div');
+        card.className = 'tratamiento-card';
+        card.innerHTML = `
+            <div class="tratamiento-header">
+                <h3>Consulta: ${tratamiento.fecha}</h3>
+                <span class="especialidad">${tratamiento.especialidad}</span>
+            </div>
+            <div class="tratamiento-body">
+                <p><strong>Diagnóstico:</strong> ${tratamiento.diagnostico}</p>
+                <p><strong>Prescripción:</strong> ${tratamiento.prescripcion}</p>
+                <p><strong>Indicaciones:</strong> ${tratamiento.indicaciones}</p>
+            </div>
+            <div class="tratamiento-footer">
+                <button class="btn-download">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+                <button class="btn-print">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+        `;
+        tratamientosList.appendChild(card);
+    });
+    
+    // Configurar eventos para los botones de descarga e impresión
+    setupTratamientosButtons();
+}
+
+// Configurar eventos para botones de tratamientos
+function setupTratamientosButtons() {
+    // Botones de descarga
+    const downloadButtons = document.querySelectorAll('.btn-download');
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            alert('Descargando receta médica en formato PDF...');
+            // En una implementación real, aquí se generaría y descargaría el PDF
+        });
+    });
+    
+    // Botones de impresión
+    const printButtons = document.querySelectorAll('.btn-print');
+    printButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            alert('Enviando receta a impresión...');
+            // En una implementación real, aquí se abriría el diálogo de impresión
+        });
+    });
+    
+    // Filtros de tratamientos
+    const filterButton = document.querySelector('#tratamientosSection .btn-filtrar');
+    if (filterButton) {
+        filterButton.addEventListener('click', function() {
+            const fecha = document.getElementById('filterTreatmentDate')?.value;
+            const especialidad = document.getElementById('filterTreatmentType')?.value;
+            
+            alert(`Filtrando tratamientos por: Fecha: ${fecha || 'Todas'}, Especialidad: ${especialidad === 'all' ? 'Todas' : especialidad}`);
+            // En una implementación real, aquí se filtrarían los tratamientos
+        });
+    }
+}
+
+// Mejorar sección de Ayuda con más preguntas frecuentes
+function enhanceHelpSection() {
+    const faqSection = document.querySelector('.faq-section');
+    if (!faqSection) return;
+    
+    // Añadir más preguntas frecuentes
+    const additionalFaqs = [
+        {
+            pregunta: '¿Cómo funciona una consulta virtual?',
+            respuesta: 'La consulta virtual se realiza a través de videollamada dentro de la plataforma. Al llegar la hora de tu cita, haz clic en el botón "Entrar" de la cita correspondiente. Se abrirá una ventana de videollamada donde podrás interactuar con el médico en tiempo real. Durante la consulta también tendrás acceso a un chat y podrás ver la prescripción que el médico te indique.'
+        },
+        {
+            pregunta: '¿Cómo puedo ver mis tratamientos anteriores?',
+            respuesta: 'Para acceder a tus tratamientos anteriores, selecciona la opción "Tratamientos" en el menú principal. Ahí encontrarás un historial de todas tus consultas médicas con las prescripciones correspondientes. Puedes filtrar por fecha o especialidad para encontrar una consulta específica, y también tienes la opción de descargar o imprimir las recetas.'
+        },
+        {
+            pregunta: '¿Qué hago si tengo problemas técnicos durante la consulta?',
+            respuesta: 'Si experimentas problemas técnicos durante una consulta virtual, intenta lo siguiente: 1) Verifica tu conexión a internet. 2) Actualiza la página. 3) Asegúrate de haber permitido el acceso a tu cámara y micrófono. 4) Si el problema persiste, utiliza el chat integrado para comunicarte con el médico. Si no puedes resolver el problema, contacta a soporte técnico a través de la sección de Ayuda.'
+        },
+        {
+            pregunta: '¿Cómo obtengo medicamentos recetados durante una consulta virtual?',
+            respuesta: 'Las prescripciones médicas quedarán registradas en la sección "Tratamientos" después de finalizada la consulta. Puedes descargar o imprimir la receta y presentarla en cualquier farmacia autorizada. En algunos casos, dependiendo de tu plan de salud, puedes solicitar el envío a domicilio a través de la red de farmacias asociadas.'
+        }
+    ];
+    
+    // Añadir las nuevas preguntas al DOM
+    additionalFaqs.forEach(faq => {
+        const faqItem = document.createElement('div');
+        faqItem.className = 'faq-item';
+        faqItem.innerHTML = `
+            <div class="faq-question" onclick="toggleFaq(this)">
+                ${faq.pregunta}
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                ${faq.respuesta}
+            </div>
+        `;
+        faqSection.appendChild(faqItem);
+    });
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración inicial - mostrar sección de citas por defecto
+    showCitas();
+    
+    // Mejorar la sección de ayuda
+    enhanceHelpSection();
+    
+    // Los demás eventos ya están siendo configurados en la función setupModalEvents()
+});

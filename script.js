@@ -895,7 +895,7 @@ function toggleUserView() {
         document.getElementById('doctorView').style.display = 'block';
         
         // Inicializar botones de la vista del doctor
-        setTimeout(initDoctorButtons, 100);
+        setTimeout(initDoctorButtons, 300);
         
         // Actualizar el botón
         document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Paciente';
@@ -1457,10 +1457,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para inicializar botones de iniciar videollamada del doctor
 function initDoctorButtons() {
+    console.log("Inicializando botones del doctor");
     const iniciarButtons = document.querySelectorAll('.btn-iniciar');
+    console.log("Botones encontrados:", iniciarButtons.length);
+    
     iniciarButtons.forEach(button => {
+        // Eliminar cualquier oyente anterior para evitar duplicados
+        button.removeAttribute("onclick");
+        
         button.addEventListener('click', function() {
-            // Obtener ID del paciente del atributo data si existe, o usar 1 como valor predeterminado
             const patientId = this.getAttribute('data-patient-id') || 1;
             console.log("Iniciando videollamada con paciente ID:", patientId);
             openDoctorVideoCall(patientId);

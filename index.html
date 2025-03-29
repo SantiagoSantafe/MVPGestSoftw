@@ -346,89 +346,84 @@
         </div>
     </div>
 
-    <!-- Videollamada -->
-    <div id="videocallContainer" class="videocall-container">
-        <div class="videocall-header">
-            <div class="call-info">
-                <h3>Consulta con Dr. Carlos Martínez</h3>
-                <span class="call-timer">00:03:45</span>
+    <!-- Videollamada (versión mejorada) -->
+<div id="videocallContainer" class="videocall-container">
+    <div class="videocall-header">
+        <div class="call-info">
+            <h3>Consulta con Dr. Carlos Martínez</h3>
+            <span class="call-timer">00:00:00</span>
+        </div>
+        <div class="call-actions">
+            <button class="btn-mic active" onclick="toggleMic()">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="btn-camera active" onclick="toggleCamera()">
+                <i class="fas fa-video"></i>
+            </button>
+            <button class="btn-end-call" onclick="endVideoCall()">
+                <i class="fas fa-phone-slash"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="videocall-content">
+        <div class="video-area">
+            <div class="main-video">
+                <video id="doctorVideo" autoplay muted class="hidden"></video>
+                <div id="doctorPlaceholder" class="video-placeholder doctor">
+                    <i class="fas fa-user-md"></i>
+                    <span>Dr. Carlos Martínez</span>
+                </div>
             </div>
-            <div class="call-actions">
-                <button class="btn-mic">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <button class="btn-camera">
-                    <i class="fas fa-video"></i>
-                </button>
-                <button class="btn-end-call" onclick="endVideoCall()">
-                    <i class="fas fa-phone-slash"></i>
-                </button>
+            <div class="self-video">
+                <video id="selfVideo" autoplay muted></video>
+                <div id="selfPlaceholder" class="video-placeholder patient hidden">
+                    <i class="fas fa-user"></i>
+                    <span>Tú</span>
+                </div>
             </div>
         </div>
         
-        <div class="videocall-content">
-            <div class="video-area">
-                <div class="main-video">
-                    <div class="video-placeholder doctor">
-                        <i class="fas fa-user-md"></i>
-                        <span>Dr. Carlos Martínez</span>
+        <div class="chat-prescription-area">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('chat')">Chat</div>
+                <div class="tab" onclick="switchTab('prescription')">Prescripción</div>
+            </div>
+            
+            <div id="chatTab" class="tab-content active">
+                <div id="chatMessages" class="chat-messages">
+                    <div class="message doctor">
+                        <span class="message-name">Dr. Carlos Martínez</span>
+                        <div class="message-bubble">Hola, bienvenido a la consulta. ¿Cómo te has sentido desde la última vez?</div>
+                        <span class="message-time">14:32</span>
                     </div>
                 </div>
-                <div class="self-video">
-                    <div class="video-placeholder patient">
-                        <i class="fas fa-user"></i>
-                        <span>Tú</span>
-                    </div>
+                <div class="chat-input">
+                    <textarea id="messageInput" placeholder="Escribe un mensaje..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
+                    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
             
-            <div class="chat-prescription-area">
-                <div class="tabs">
-                    <div class="tab active" onclick="switchTab('chat')">Chat</div>
-                    <div class="tab" onclick="switchTab('prescription')">Prescripción</div>
-                </div>
-                
-                <div id="chatTab" class="tab-content active">
-                    <div class="chat-messages">
-                        <div class="message doctor">
-                            <span class="message-name">Dr. Carlos Martínez</span>
-                            <div class="message-bubble">Hola, ¿cómo te has sentido desde la última consulta?</div>
-                            <span class="message-time">14:32</span>
-                        </div>
-                        <div class="message patient">
-                            <span class="message-name">Tú</span>
-                            <div class="message-bubble">Hola doctor, el dolor ha disminuido pero aún tengo molestias después de comer.</div>
-                            <span class="message-time">14:33</span>
-                        </div>
-                    </div>
-                    <div class="chat-input">
-                        <textarea placeholder="Escribe un mensaje..."></textarea>
-                        <button><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
-                
-                <div id="prescriptionTab" class="tab-content">
-                    <div class="prescription-content">
-                        <h4>Prescripción médica</h4>
-                        <div class="prescription-details">
-                            <p><strong>Diagnóstico preliminar:</strong> Gastritis aguda</p>
-                            <p><strong>Medicamentos:</strong></p>
-                            <ul>
-                                <li>Omeprazol 20mg - 1 cápsula en ayunas por 14 días</li>
-                                <li>Sucralfato suspensión - 10ml antes de cada comida por 7 días</li>
-                            </ul>
-                            <p><strong>Recomendaciones:</strong></p>
-                            <ul>
-                                <li>Dieta blanda, evitar alimentos ácidos y picantes</li>
-                                <li>Control en 15 días</li>
-                            </ul>
-                            <p><small>Esta prescripción estará disponible en la sección de "Tratamientos" una vez finalizada la consulta.</small></p>
-                        </div>
+            <div id="prescriptionTab" class="tab-content">
+                <div class="prescription-content">
+                    <h4>Prescripción médica</h4>
+                    <div class="prescription-details">
+                        <p><strong>Diagnóstico preliminar:</strong> <span id="diagnostico">Pendiente</span></p>
+                        <p><strong>Medicamentos:</strong></p>
+                        <ul id="medicamentos">
+                            <li>El médico añadirá la prescripción durante la consulta</li>
+                        </ul>
+                        <p><strong>Recomendaciones:</strong></p>
+                        <ul id="recomendaciones">
+                            <li>Pendiente de recomendaciones del médico</li>
+                        </ul>
+                        <p><small>Esta prescripción estará disponible en la sección de "Tratamientos" una vez finalizada la consulta.</small></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Formulario de Login -->
     <div id="loginOverlay" class="login-overlay">

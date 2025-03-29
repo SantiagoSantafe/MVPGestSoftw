@@ -1,178 +1,96 @@
-// Funciones para mostrar/ocultar paneles de notificaciones y perfil
-function toggleNotifications() {
-    const panel = document.getElementById('notificationsPanel');
-    if (panel.style.display === 'block') {
-        panel.style.display = 'none';
-    } else {
-        panel.style.display = 'block';
-        document.getElementById('profileMenu').style.display = 'none';
-    }
-}
+// Variables para manejo de videollamada
+let localStream;
+let callTimerInterval;
+let callSeconds = 0;
+let isMicOn = true;
+let isCameraOn = true;
 
-function toggleProfileMenu() {
-    const menu = document.getElementById('profileMenu');
-    if (menu.style.display === 'block') {
-        menu.style.display = 'none';
-    } else {
-        menu.style.display = 'block';
-        document.getElementById('notificationsPanel').style.display = 'none';
-    }
-}
-
-// Funciones para cambiar entre secciones
-function showCitas() {
-    document.getElementById('citasList').style.display = 'block';
-    document.getElementById('filterSection').style.display = 'block';
-    document.getElementById('tratamientosSection').style.display = 'none';
-    document.getElementById('helpSection').style.display = 'none';
-    
-    // Actualizar el menú activo
-    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
-    document.querySelector('.menu a[onclick="showCitas()"]').classList.add('active');
-}
-
-function showTratamientos() {
-    document.getElementById('citasList').style.display = 'none';
-    document.getElementById('filterSection').style.display = 'none';
-    document.getElementById('tratamientosSection').style.display = 'block';
-    document.getElementById('helpSection').style.display = 'none';
-    
-    // Actualizar el menú activo
-    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
-    document.querySelector('.menu a[onclick="showTratamientos()"]').classList.add('active');
-}
-
-function showHelp() {
-    document.getElementById('citasList').style.display = 'none';
-    document.getElementById('filterSection').style.display = 'none';
-    document.getElementById('tratamientosSection').style.display = 'none';
-    document.getElementById('helpSection').style.display = 'block';
-    
-    // Actualizar el menú activo
-    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
-    document.querySelector('.menu a[onclick="showHelp()"]').classList.add('active');
-}
-
-// Funciones para modales de consulta
-function openModal(citaId) {
-    document.getElementById('modal').style.display = 'block';
-    document.getElementById('modal-overlay').style.display = 'block';
-    
-    // Aquí se podría cargar la información específica de la cita según su ID
-    console.log('Abriendo modal para la cita ID:', citaId);
-}
-
-function closeModal() {
-    document.getElementById('modal').style.display = 'none';
-    document.getElementById('modal-overlay').style.display = 'none';
-}
-
-// Funciones para modal de cancelación
-function openCancelModal(citaId) {
-    document.getElementById('cancelModal').style.display = 'block';
-    document.getElementById('modal-overlay').style.display = 'block';
-    
-    // Aquí se podría cargar la información específica de la cita a cancelar
-    // Por ahora usamos datos de ejemplo
-    if (citaId === 2) {
-        document.getElementById('cancelDate').textContent = '18/04/2025';
-        document.getElementById('cancelTime').textContent = '10:15';
-        document.getElementById('cancelDoctor').textContent = 'Dra. Laura Sánchez';
-    }
-    
-    console.log('Abriendo modal de cancelación para la cita ID:', citaId);
-}
-
-function closeCancelModal() {
-    document.getElementById('cancelModal').style.display = 'none';
-    document.getElementById('modal-overlay').style.display = 'none';
-}
-
-function confirmCancelCita() {
-    const reason = document.getElementById('cancelReason').value;
-    if (!reason.trim()) {
-        alert('Por favor, indica el motivo de la cancelación.');
-        return;
-    }
-    
-    // Aquí se enviaría la solicitud al servidor para cancelar la cita
-    console.log('Cita cancelada. Motivo:', reason);
-    
-    // Mostrar notificación
-    alert('Cita cancelada correctamente. Recibirás un reembolso en breve.');
-    
-    closeCancelModal();
-}
-
-// Funciones para modal de reagendar
-function openReagendarModal(citaId) {
-    document.getElementById('reagendarModal').style.display = 'block';
-    document.getElementById('modal-overlay').style.display = 'block';
-    
-    // Aquí se podría cargar la información específica de la cita a reagendar
-    if (citaId === 2) {
-        document.getElementById('reagendarDoctor').textContent = 'Dra. Laura Sánchez - Cardiología';
-    }
-    
-    console.log('Abriendo modal de reagendar para la cita ID:', citaId);
-    
-    // Agregar manejadores de eventos a los slots de tiempo
-    const timeSlots = document.querySelectorAll('.time-slot');
-    timeSlots.forEach(slot => {
-        slot.addEventListener('click', function() {
-            timeSlots.forEach(s => s.classList.remove('selected'));
-            this.classList.add('selected');
-        });
-    });
-}
-
-function closeReagendarModal() {
-    document.getElementById('reagendarModal').style.display = 'none';
-    document.getElementById('modal-overlay').style.display = 'none';
-}
-
-function confirmReagendarCita() {
-    const newDate = document.getElementById('newDate').value;
-    const selectedSlot = document.querySelector('.time-slot.selected');
-    
-    if (!newDate) {
-        alert('Por favor, selecciona una fecha.');
-        return;
-    }
-    
-    if (!selectedSlot) {
-        alert('Por favor, selecciona una hora disponible.');
-        return;
-    }
-    
-    const newTime = selectedSlot.textContent;
-    
-    // Aquí se enviaría la solicitud al servidor para reagendar la cita
-    console.log('Cita reagendada para:', newDate, 'a las', newTime);
-    
-    // Mostrar notificación
-    alert(`Cita reagendada correctamente para el ${newDate} a las ${newTime}.`);
-    
-    closeReagendarModal();
-}
-
-// Funciones para videollamada
+// Función para abrir videollamada y activar cámara
 function openVideoCall() {
     closeModal();
     document.getElementById('videocallContainer').style.display = 'block';
     
-    // Iniciar tiempo de llamada
-    startCallTimer();
+    // Solicitar permisos de cámara y micrófono
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function(stream) {
+            localStream = stream;
+            
+            // Mostrar video local
+            const selfVideo = document.getElementById('selfVideo');
+            selfVideo.srcObject = stream;
+            
+            // Ocultar placeholder y mostrar video
+            document.getElementById('selfPlaceholder').classList.add('hidden');
+            selfVideo.classList.remove('hidden');
+            
+            // Iniciar tiempo de llamada
+            startCallTimer();
+        })
+        .catch(function(error) {
+            console.error("Error accediendo a la cámara y/o micrófono:", error);
+            alert("No se pudo acceder a la cámara y/o micrófono. Por favor, verifica los permisos del navegador.");
+            
+            // Mostrar placeholders en caso de error
+            document.getElementById('selfPlaceholder').classList.remove('hidden');
+            document.getElementById('selfVideo').classList.add('hidden');
+        });
 }
 
+// Función para terminar la videollamada
 function endVideoCall() {
     document.getElementById('videocallContainer').style.display = 'none';
     stopCallTimer();
+    
+    // Detener todas las pistas del stream local
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
 }
 
-let callTimerInterval;
-let callSeconds = 0;
+// Funciones para controlar micrófono y cámara
+function toggleMic() {
+    if (!localStream) return;
+    
+    const micBtn = document.querySelector('.btn-mic');
+    localStream.getAudioTracks().forEach(track => {
+        track.enabled = !track.enabled;
+        isMicOn = track.enabled;
+    });
+    
+    if (isMicOn) {
+        micBtn.classList.add('active');
+        micBtn.classList.remove('muted');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    } else {
+        micBtn.classList.remove('active');
+        micBtn.classList.add('muted');
+        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+    }
+}
 
+function toggleCamera() {
+    if (!localStream) return;
+    
+    const cameraBtn = document.querySelector('.btn-camera');
+    localStream.getVideoTracks().forEach(track => {
+        track.enabled = !track.enabled;
+        isCameraOn = track.enabled;
+    });
+    
+    if (isCameraOn) {
+        cameraBtn.classList.add('active');
+        cameraBtn.classList.remove('off');
+        cameraBtn.innerHTML = '<i class="fas fa-video"></i>';
+        document.getElementById('selfPlaceholder').classList.add('hidden');
+    } else {
+        cameraBtn.classList.remove('active');
+        cameraBtn.classList.add('off');
+        cameraBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
+        document.getElementById('selfPlaceholder').classList.remove('hidden');
+    }
+}
+
+// Funciones para controlar el tiempo de llamada
 function startCallTimer() {
     callSeconds = 0;
     callTimerInterval = setInterval(updateCallTimer, 1000);
@@ -196,7 +114,111 @@ function stopCallTimer() {
     clearInterval(callTimerInterval);
 }
 
-// Funciones para pestañas de videollamada
+// Funciones para el chat
+function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    if (message === '') return;
+    
+    // Obtener la hora actual
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    // Crear elemento de mensaje
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message patient';
+    messageElement.innerHTML = `
+        <span class="message-name">Tú</span>
+        <div class="message-bubble">${message}</div>
+        <span class="message-time">${timeString}</span>
+    `;
+    
+    // Agregar mensaje al chat
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.appendChild(messageElement);
+    
+    // Limpiar input
+    messageInput.value = '';
+    
+    // Scroll al final del chat
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Simular respuesta del médico después de un breve retraso
+    setTimeout(() => {
+        simulateDoctorResponse();
+    }, 1500);
+}
+
+function simulateDoctorResponse() {
+    // Mensajes posibles del médico
+    const doctorResponses = [
+        "Entiendo. ¿Podrías darme más detalles sobre tus síntomas?",
+        "Gracias por la información. Basado en lo que me comentas, te recomendaré un tratamiento adecuado.",
+        "¿Desde cuándo estás experimentando estos síntomas?",
+        "¿Has tomado algún medicamento por tu cuenta?",
+        "Voy a actualizar tu receta en la sección de prescripción. Por favor, revísala en un momento."
+    ];
+    
+    // Seleccionar respuesta aleatoria
+    const randomResponse = doctorResponses[Math.floor(Math.random() * doctorResponses.length)];
+    
+    // Obtener la hora actual
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    // Crear elemento de mensaje
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message doctor';
+    messageElement.innerHTML = `
+        <span class="message-name">Dr. Carlos Martínez</span>
+        <div class="message-bubble">${randomResponse}</div>
+        <span class="message-time">${timeString}</span>
+    `;
+    
+    // Agregar mensaje al chat
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.appendChild(messageElement);
+    
+    // Scroll al final del chat
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Si es el último mensaje de la lista, actualizar la prescripción
+    if (randomResponse.includes("actualizar tu receta")) {
+        setTimeout(() => {
+            updatePrescription();
+        }, 1000);
+    }
+}
+
+function updatePrescription() {
+    // Actualizar la prescripción médica
+    document.getElementById('diagnostico').textContent = "Gastritis aguda";
+    
+    // Actualizar medicamentos
+    const medicamentosElement = document.getElementById('medicamentos');
+    medicamentosElement.innerHTML = `
+        <li>Omeprazol 20mg - 1 cápsula en ayunas por 14 días</li>
+        <li>Sucralfato suspensión - 10ml antes de cada comida por 7 días</li>
+    `;
+    
+    // Actualizar recomendaciones
+    const recomendacionesElement = document.getElementById('recomendaciones');
+    recomendacionesElement.innerHTML = `
+        <li>Dieta blanda, evitar alimentos ácidos y picantes</li>
+        <li>Evitar café, alcohol y tabaco durante el tratamiento</li>
+        <li>Control en 15 días</li>
+    `;
+    
+    // Cambiar a la pestaña de prescripción
+    switchTab('prescription');
+}
+
+// Función para cambiar entre pestañas
 function switchTab(tabName) {
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -207,76 +229,3 @@ function switchTab(tabName) {
     document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
     document.getElementById(`${tabName}Tab`).classList.add('active');
 }
-
-// Funciones de login
-function showLoginForm() {
-    document.getElementById('loginOverlay').style.display = 'flex';
-}
-
-function login() {
-    const cedula = document.getElementById('cedula').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    if (!cedula || !email || !password) {
-        alert('Por favor, completa todos los campos.');
-        return;
-    }
-    
-    // Aquí se enviaría la solicitud al servidor para validar las credenciales
-    console.log('Iniciando sesión con:', cedula, email);
-    
-    // Ocultar el formulario de login
-    document.getElementById('loginOverlay').style.display = 'none';
-}
-
-// Funciones para FAQs
-function toggleFaq(element) {
-    const answer = element.nextElementSibling;
-    const icon = element.querySelector('i');
-    
-    if (answer.style.display === 'block') {
-        answer.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
-    } else {
-        answer.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
-    }
-}
-
-// Funciones para filtros
-function aplicarFiltros() {
-    const fecha = document.getElementById('filterDate').value;
-    const especialidad = document.getElementById('filterEspecialidad').value;
-    
-    console.log('Filtrando por fecha:', fecha, 'y especialidad:', especialidad);
-    
-    // Aquí se implementaría la lógica para filtrar las citas
-    alert('Filtros aplicados correctamente.');
-}
-
-// Cerrar paneles al hacer clic fuera de ellos
-document.addEventListener('click', function(event) {
-    const notificationsPanel = document.getElementById('notificationsPanel');
-    const profileMenu = document.getElementById('profileMenu');
-    const notificationsButton = document.querySelector('.notifications');
-    const profileButton = document.querySelector('.profile');
-    
-    if (notificationsPanel.style.display === 'block' && 
-        !notificationsPanel.contains(event.target) && 
-        !notificationsButton.contains(event.target)) {
-        notificationsPanel.style.display = 'none';
-    }
-    
-    if (profileMenu.style.display === 'block' && 
-        !profileMenu.contains(event.target) && 
-        !profileButton.contains(event.target)) {
-        profileMenu.style.display = 'none';
-    }
-});
-
-// Inicialización
-document.addEventListener('DOMContentLoaded', function() {
-    // Mostrar la sección de citas por defecto
-    showCitas();
-});

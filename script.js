@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             openVideoCall();
         });
+        initDoctorButtons();
+    
+        // Si estamos en la vista de doctor (por ejemplo, si se guardó en el localStorage)
+        if (localStorage.getItem('currentView') === 'doctor') {
+            toggleUserView(); // Cambiar a vista doctor
+        }
     });
 
     // Evento para botón en el modal
@@ -873,7 +879,7 @@ function toggleUserView() {
         document.body.style.background = '#f0f4f8';
         
         // Ocultar TODOS los elementos de la vista de paciente
-        const pacienteHeader = document.querySelector('body > header'); // Selecciona el header principal
+        const pacienteHeader = document.querySelector('body > header');
         if (pacienteHeader) {
             pacienteHeader.style.display = 'none';
         }
@@ -883,15 +889,19 @@ function toggleUserView() {
         document.getElementById('tratamientosSection').style.display = 'none';
         document.getElementById('helpSection').style.display = 'none';
         document.getElementById('videocallContainer').style.display = 'none';
-        document.querySelector('.menu').style.display = 'none'; // Ocultar menú de paciente
+        document.querySelector('.menu').style.display = 'none';
         
         // Mostrar la vista del doctor
         document.getElementById('doctorView').style.display = 'block';
+        
+        // Inicializar botones de la vista del doctor
+        setTimeout(initDoctorButtons, 100);
         
         // Actualizar el botón
         document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Paciente';
         
         currentView = 'doctor';
+        localStorage.setItem('currentView', 'doctor');
     } else {
         // Cambiar a vista de paciente
         document.body.style.background = '#f5f7fa';
@@ -913,6 +923,7 @@ function toggleUserView() {
         document.getElementById('toggleViewBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar a Vista Doctor';
         
         currentView = 'patient';
+        localStorage.setItem('currentView', 'patient');
     }
 }
 
@@ -952,11 +963,24 @@ function showDoctorHistorial() {
 
 // Función para iniciar videollamada desde la vista del doctor
 function openDoctorVideoCall(patientId) {
-    document.getElementById('doctorVideocallContainer').style.display = 'block';
+    console.log("Abriendo videollamada del doctor con paciente ID:", patientId);
+    
+    // Asegurarse de que el contenedor existe
+    const doctorVideocallContainer = document.getElementById('doctorVideocallContainer');
+    if (!doctorVideocallContainer) {
+        console.error("No se encontró el contenedor de videollamada del doctor");
+        return;
+    }
+    
+    // Mostrar el contenedor
+    doctorVideocallContainer.style.display = 'block';
     
     // Ocultar secciones del doctor
-    document.getElementById('doctorConsultasList').style.display = 'none';
-    document.getElementById('doctorFilterSection').style.display = 'none';
+    const doctorConsultasList = document.getElementById('doctorConsultasList');
+    const doctorFilterSection = document.getElementById('doctorFilterSection');
+    
+    if (doctorConsultasList) doctorConsultasList.style.display = 'none';
+    if (doctorFilterSection) doctorFilterSection.style.display = 'none';
     
     // Solicitar acceso a cámara y micrófono
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1430,3 +1454,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Función para inicializar botones de iniciar videollamada del doctor
+function initDoctorButtons() {
+    const iniciarButtons = document.querySelectorAll('.btn-iniciar');
+    iniciarButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Obtener ID del paciente del atributo data si existe, o usar 1 como valor predeterminado
+            const patientId = this.getAttribute('data-patient-id') || 1;
+            console.log("Iniciando videollamada con paciente ID:", patientId);
+            openDoctorVideoCall(patientId);
+        });
+    });
+}
